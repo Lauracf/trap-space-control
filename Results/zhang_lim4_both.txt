@@ -1,0 +1,10 @@
+Phenotype = {'Apoptosis': 1, 'Proliferation': 0}
+#Control strategies percolation only
+CS_per = [{'Caspase': 1}]
+#Control strategies via trapspaces
+CS_ts = [{'CD45': 0, 'IL15': 0, 'TAX': 1},
+ {'CD45': 0, 'IL15': 0, 'PDGF': 1},
+ {'CD45': 0, 'IL15': 0, 'Stimuli': 1},
+ {'CD45': 1, 'PDGF': 0, 'PDGFR': 0, 'Stimuli2': 1},
+ {'CD45': 1, 'PDGF': 0, 'S1P': 0, 'Stimuli2': 1},
+ {'CD45': 1, 'PDGF': 0, 'SPHK1': 0, 'Stimuli2': 1}]

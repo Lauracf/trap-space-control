@@ -7,7 +7,7 @@ This repository contains functions to identify control strategies for Boolean ne
 
 ## Requirements
 
-The code requeires the use of PyBoolNet, a python package for the generation, modification and analysis of Boolean networks. Information about PyBoolNet, user manual and installation can be found at
+The code requires the use of PyBoolNet, a python package for the generation, modification and analysis of Boolean networks. Information about PyBoolNet, user manual and installation can be found at
 
 * https://github.com/hklarner/PyBoolNet
 
@@ -16,7 +16,7 @@ The code works with Boolean networks in BoolNet format.
 
 ## Description
 
-The main functions are included in *Control.py* and are called from the main file (see *control_strategies_mapk.py* or *control_strategies_tlgl.py* for an example). The main file allows to set the parameters for the control strategy identification.
+The main functions are included in *Control.py*. The files *control_strategies_mapk.py* or *control_strategies_tlgl.py* show examples of how to use *Control.py*, setting the parameters for the control strategy identification.
 
 ### Setting the parameters
 
