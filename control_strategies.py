@@ -1,4 +1,6 @@
 from itertools import combinations, product
+from os import system
+from typing import List
 
 from pyboolnet.trap_spaces import compute_trap_spaces, compute_trapspaces_that_intersect_subspace
 
@@ -32,7 +34,7 @@ def run_control_problem(primes, target, intervention_type, control_type, avoid_n
     system("rm output_asp.txt")
     command_ts = "clingo --enum-mode=domRec --heuristic=Domain --dom-mod=5,16 " + "program_instance.asp control_node_and_edge.asp 0 >> output_asp.txt"
     system(command_ts)
-    cs_asp = read_intv_from_asp_output(primes=primes, filename="output_asp.txt", node_intervention="node")
+    cs_asp = read_intv_from_asp_output(primes=primes, filename="output_asp.txt")
     print("Number of CS asp:", results_info(cs_asp))
 
     # Saving output
