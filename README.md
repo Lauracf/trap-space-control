@@ -1,8 +1,13 @@
 # Control strategies via trap spaces
 
-This repository contains functions to identify control strategies for Boolean networks, as described in the paper titled "Control Strategy Identification via Trap Spaces in Boolean Networks" accepted at Computational Methods in Systems Biology (CMSB) 2020. A preprint version is available at
+This repository contains the source code for the method to identify control strategies for Boolean networks using Answer Set Programming, as described in the paper titled "Node and edge control strategy identification via trap spaces in Boolean networks". A preprint version is available at
 
- * https://arxiv.org/abs/2005.09390
+ * TBA
+
+
+The paper above is an extended version of the paper "Control Strategy Identification via Trap Spaces in Boolean Networks" accepted at Computational Methods in Systems Biology (CMSB) 2020, available at
+
+ * https://doi.org/10.1007/978-3-030-60327-4_9
 
 
 ## Requirements
@@ -16,20 +21,22 @@ The code works with Boolean networks in BoolNet format.
 
 ## Description
 
-The main functions are included in *Control.py*. The files *control_strategies_mapk.py* or *control_strategies_tlgl.py* show examples of how to use *Control.py*, setting the parameters for the control strategy identification.
+The main functions are included in *control_strategies.py*. The files *case_study_mapk.py* or *case_study_tlgl.py* show examples of how to use *control_strategies.py*, setting the parameters for the control strategy identification.
 
 ### Setting the parameters
 
- * **bnet_file** (string): file of the Boolean network in BoolNet format.
- * **type_CS** (string): type of control strategies that are computed. The options are *via_trapspaces*, *percolation_only* or *both*.
- * **phenotype** (dictionary): subspace defining the target phenotype.
+ * **bnet** (string): file of the Boolean network in BoolNet format.
+ * **target** (dictionary): subspace defining the target.
+ * **intervention_type** (string): type of interventions. The options are *node*, *edge* or *combined*.
+ * **control_type** (string): type of control. The options are *percolation*, *trap_spaces* or *both*.
+ * **update** (string): type of update. The options are *asynchronous*, *synchronous* or *mixed*.
  * **avoid_nodes** (list): nodes that cannot be part of the control strategies.
+ * **avoid_edges** (list): edges that cannot be part of the control strategies.
  * **limit** (integer): upper limit on the size of the control strategies.
  * **use_attractors** (bool): indicates whether the trap spaces can be selected using the information about the attractors.
  * **complex_attractors** (list): if needed, complex attractors that are not minimal trap spaces.
- * **comments** (bool): if active, information about the process and the control strategies computed is shown.
  * **output_file** (string): file where the results are stored.
  
  
-Subspaces are represented with Python dictionaries, where the fixed variables and their values are the keys and the values, respectively, of the dictionary. A complex attractor is expected as the list of the states that belong to it, each state expressed as a subspace.
+Note that subspaces are represented using Python dictionaries, where the fixed variables and their values are the keys and the values, respectively, of the dictionary. A complex attractor is expected as the list of the states that belong to it, each state expressed as a subspace.
 
