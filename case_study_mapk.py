@@ -34,6 +34,7 @@ if __name__ == "__main__":
         control_type=control_type,
         avoid_nodes=avoid_nodes,
         avoid_edges=avoid_edges,
+        limit=limit,
         output_file=output_file,
         use_attractors=use_attractors,
         complex_attractors=complex_attractors)
