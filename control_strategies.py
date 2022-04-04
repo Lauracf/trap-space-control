@@ -1,8 +1,82 @@
 from itertools import combinations, product
 from os import system
 from typing import List
+from clingo import Control
 
 from pyboolnet.trap_spaces import compute_trap_spaces, compute_trapspaces_that_intersect_subspace
+
+def run_node_edge_control_asp(program_instance: str):  
+    
+    ctl = Control(arguments=[f"--models=0", "--opt-mode=optN", "--enum-mode=domRec", "--heuristic=Domain", "--dom-mod=5,16",])
+    
+    ctl.add(name="base", parameters={}, program=program_instance)
+    
+    ctl.add(name="base", parameters={}, program="""
+        goal(T,S) :- goal(Z,T,S), Z < 0.
+        satisfy(V,W,S) :- formula(W,D); dnf(D,C); clause(C,V,S).
+        closure(V,T)   :- goal(V,T).
+        closure(V,S*T) :- closure(W,T); satisfy(V,W,S); not goal(V,-S*T).
+        { node(V,S) } :- closure(V,S), not avoid_node(V), satisfied(Z), Z < 0.
+        { node(V,S) : goal(Z,V,S), not avoid_node(V), satisfied(Z), subspace(Z), Z >= 0}.
+        { edge(Vi,Vj,1) } :- formula(Vj,D), dnf(D,C), clause(C, Vi, S), not avoid_edge(Vi,Vj).
+        { edge(Vi,Vj,-1) } :- formula(Vj,D), dnf(D,C), clause(C, Vi, S), not avoid_edge(Vi,Vj). 
+        :- node(V,S), node(V,-S).
+        :- edge(Vi,Vj,S), edge(Vi, Vj, -S).
+        :- node(V,S), edge(V,Vj).
+        :- node(V), edge(Vi,V).
+        node(V) :- node(V,S).
+        edge(Vi,Vj) :- edge(Vi,Vj,S).
+        new_clause(C,V,S) :- clause(C,V,S); dnf(D,C); formula(Vj,D); not edge(V,Vj).
+        remove_dnf(D,C):- clause(C,Vi,-S); edge(Vi,Vj,S); dnf(D,C); formula(Vj,D).
+        new_dnf(D,C) :- new_clause(C,Vi,S); dnf(D,C); formula(Vj,D); not remove_dnf(D,C).
+        remove_formula(Vj,D) :- dnf(D,C); formula(Vj,D); edge(Vi,Vj,S) : clause(C,Vi,S).
+        new_formula(V,D) :- new_dnf(D,C); formula(V,D); not remove_formula(V,D).
+        fixed_node(V,1) :- remove_formula(V,D).
+        fixed_node(V,-1) :- not remove_formula(V,D); not new_formula(V,D); formula(V,D).
+        intervention(V,S) :- node(V,S).
+        intervention(V,S) :- not node(V,S), not node(V,-S), fixed_node(V,S).
+        intervention(V) :- intervention(V,S).
+        eval_formula(Z,V,S) :- subspace(Z); intervention(V,S).
+        free(Z,V,D) :- new_formula(V,D); subspace(Z); not intervention(V).
+        eval_clause(Z,C,-1) :- new_clause(C,V,S); eval_formula(Z,V,-S).
+        eval_formula(Z,V, 1) :- free(Z,V,D); eval_formula(Z,W,T) : new_clause(C,W,T); new_dnf(D,C).
+        eval_formula(Z,V,-1) :- free(Z,V,D); eval_clause(Z,C,-1) : new_dnf(D,C).
+        not satisfied(Z) :- goal(Z,T,S), not eval_formula(Z,T,S), subspace(Z).
+        satisfied(Z) :- eval_formula(Z,T,S) : goal(Z,T,S); subspace(Z).
+        0 < { satisfied(Z) : subspace(Z) }.
+        :- maxsize>0; maxsize + 1 { node(V,R); edge(Vi,Vj,S) }.
+        :- maxnodes<0; 1 { node(V,S) }.
+        :- maxedges<0; 1 { edge(Vi,Vj,S) }.
+        #show node/2.
+        #show edge/3.
+        """)
+    
+    ctl.ground([("base", [])])
+    
+    models = []
+    with ctl.solve(yield_=True) as handle:
+        for model in handle:
+            models.append(model.symbols(shown=True))
+
+    return models
+
+
+def read_asp_output(primes: dict, models: List[list]):
+
+    lower_to_prime = {n.lower(): n for n in primes}
+    value_to_boolean = {1:1, -1:0}
+    
+    cs_total = []
+    for x in models:
+        cs = {}
+        for y in x:
+            if y.name == "node":
+                cs[lower_to_prime[y.arguments[0].name]] = value_to_boolean[y.arguments[1].number]
+            if y.name == "edge":
+                cs[(lower_to_prime[y.arguments[0].name], lower_to_prime[y.arguments[1].name])] = value_to_boolean[y.arguments[2].number]
+        cs_total.append(cs)
+    
+    return cs_total
 
 
 def run_control_problem(primes, target, intervention_type, control_type, avoid_nodes: dict = {}, avoid_edges: dict = {}, limit: int = 3, output_file: str = "", use_attractors: bool = True, complex_attractors: List[List[dict]] = []):
@@ -18,24 +92,20 @@ def run_control_problem(primes, target, intervention_type, control_type, avoid_n
         target_percolation = []
         print("Num of selected trap spaces:", len(target_trap_spaces))
 
-        if control_type == "transient":
-            target_percolation = target_trap_spaces
-            target_trap_spaces = []
-
-        elif control_type == "both":
-            target_percolation = [target]
+    if control_type == "transient":
+        target_percolation = target_trap_spaces
+        target_trap_spaces = []
+    elif control_type == "both":
+        target_percolation = [target]
     else:
         target_trap_spaces = []
         target_percolation = [target]
 
     # Computing CS in ASP
 
-    create_asp_program_instance(primes=primes, intervention_type=intervention_type, target_trap_spaces=target_trap_spaces, target_subspaces=target_percolation, max_size=limit, avoid_nodes=avoid_nodes, avoid_edges=avoid_edges, filename="program_instance")
-    system("rm output_asp.txt")
-    command_ts = "clingo --enum-mode=domRec --heuristic=Domain --dom-mod=5,16 " + "program_instance.asp control_node_and_edge.asp 0 >> output_asp.txt"
-    system(command_ts)
-    cs_asp = read_intv_from_asp_output(primes=primes, filename="output_asp.txt")
-    print("Number of CS asp:", results_info(cs_asp))
+    program_instance = create_asp_program_instance(primes=primes, intervention_type=intervention_type, target_trap_spaces=target_trap_spaces, target_subspaces=target_percolation, max_size=limit, avoid_nodes=avoid_nodes, avoid_edges=avoid_edges, filename="program_instance")
+    models = run_node_edge_control_asp(program_instance)
+    cs_asp = read_asp_output(primes, models)
 
     # Saving output
 
@@ -119,46 +189,7 @@ def create_asp_program_instance(primes: dict, intervention_type: str, target_tra
         # Saving file
         with open(filename + ".asp", "w") as file:
             file.write(final_text.lower())
-    return final_text
-
-
-def read_intv_from_asp_output(primes: dict, filename: str):
-    cs_total = list()
-    file = open(filename)
-    text = file.read()
-    text = text.split("\n")
-    if any(lin == "UNSATISFIABLE" for lin in text):
-        return([])
-    else:
-        for lin in text:
-            if "node" in lin or "edge" in lin:
-                cs = dict()
-                parts = lin.split(" ")
-                for x in parts:
-                    if "edge" in x:
-                        y = x.replace("edge", "").replace("(", "").replace(")", "").split(",")
-                        y[2] = int(y[2])
-                        if y[2] == -1:
-                            y[2] = 0
-                        for n in primes.keys():
-                            if n.lower() == y[0]:
-                                y[0] = n
-                            if n.lower() == y[1]:
-                                y[1] = n
-                        cs[(y[0], y[1])] = y[2]
-                    if "node" in x:
-                        y = x.replace("node", "").replace("(", "").replace(")", "").split(",")
-                        y[1] = int(y[1])
-                        if y[1] == -1:
-                            y[1] = 0
-                        for n in primes.keys():
-                            if n.lower() == y[0]:
-                                y[0] = n
-                        cs[y[0]] = y[1]
-                cs_total.append(cs)
-        if len(cs_total) == 0:
-            cs_total.append({})
-    return(cs_total)
+    return final_text.lower()
 
 
 def is_included_in_subspace(subspace1: dict, subspace2: dict):
