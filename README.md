@@ -2,7 +2,7 @@
 
 This repository contains the source code for the method to identify control strategies for Boolean networks using Answer Set Programming, as described in the paper titled "Node and edge control strategy identification via trap spaces in Boolean networks". A preprint version is available at
 
- * TBA
+ * https://doi.org/10.48550/arXiv.2203.13632
 
 
 The paper above is an extended version of the paper "Control Strategy Identification via Trap Spaces in Boolean Networks" accepted at Computational Methods in Systems Biology (CMSB) 2020, available at
