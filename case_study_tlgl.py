@@ -18,7 +18,7 @@ if __name__ == "__main__":
     target = {"Apoptosis": 1, "Proliferation": 0}
     avoid_nodes = []
     avoid_edges = []
-    limit = 2
+    limit = 3
 
     use_attractors = True
     complex_attractors = []
