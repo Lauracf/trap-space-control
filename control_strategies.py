@@ -92,11 +92,11 @@ def run_control_problem(primes, target, intervention_type, control_type, avoid_n
         target_percolation = []
         print("Num of selected trap spaces:", len(target_trap_spaces))
 
-    if control_type == "transient":
-        target_percolation = target_trap_spaces
-        target_trap_spaces = []
-    elif control_type == "both":
-        target_percolation = [target]
+        if control_type == "transient":
+            target_percolation = target_trap_spaces
+            target_trap_spaces = []
+        elif control_type == "both":
+            target_percolation = [target]
     else:
         target_trap_spaces = []
         target_percolation = [target]
