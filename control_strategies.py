@@ -18,8 +18,8 @@ def run_node_edge_control_asp(program_instance: str):
         closure(V,S*T) :- closure(W,T); satisfy(V,W,S); not goal(V,-S*T).
         { node(V,S) } :- closure(V,S), not avoid_node(V), satisfied(Z), Z < 0.
         { node(V,S) : goal(Z,V,S), not avoid_node(V), satisfied(Z), subspace(Z), Z >= 0}.
-        { edge(Vi,Vj,1) } :- formula(Vj,D), dnf(D,C), clause(C, Vi, S), not avoid_edge(Vi,Vj).
-        { edge(Vi,Vj,-1) } :- formula(Vj,D), dnf(D,C), clause(C, Vi, S), not avoid_edge(Vi,Vj). 
+        { edge(Vi,Vj,1); edge(Vi,Vj,-1) } :- formula(Vj,D), dnf(D,C), clause(C, Vi, S), not avoid_edge(Vi,Vj), satisfied(Z), Z < 0.
+        { edge(Vi,Vj,1); edge(Vi,Vj,-1) } :- formula(Vj,D), dnf(D,C), clause(C, Vi, S), not avoid_edge(Vi,Vj), goal(Z,Vj,T), satisfied(Z), subspace(Z), Z >= 0.
         :- node(V,S), node(V,-S).
         :- edge(Vi,Vj,S), edge(Vi, Vj, -S).
         :- node(V,S), edge(V,Vj).

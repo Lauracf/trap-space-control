@@ -14,9 +14,9 @@ closure(V,S*T) :- closure(W,T); satisfy(V,W,S); not goal(V,-S*T).
 
 %% Percolation set up - edge control
 
-{ edge(Vi,Vj,1) } :- formula(Vj,D), dnf(D,C), clause(C, Vi, S), not avoid_edge(Vi,Vj).
-{ edge(Vi,Vj,-1) } :- formula(Vj,D), dnf(D,C), clause(C, Vi, S), not avoid_edge(Vi,Vj). 
-
+{ edge(Vi,Vj,1); edge(Vi,Vj,-1) } :- formula(Vj,D), dnf(D,C), clause(C, Vi, S), not avoid_edge(Vi,Vj), satisfied(Z), Z < 0.
+{ edge(Vi,Vj,1); edge(Vi,Vj,-1) } :- formula(Vj,D), dnf(D,C), clause(C, Vi, S), not avoid_edge(Vi,Vj), goal(Z,Vj,T), satisfied(Z), subspace(Z), Z >= 0.
+   
 
 % Restrictions on interventions
 
