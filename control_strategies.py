@@ -159,7 +159,7 @@ def create_asp_program_instance(primes: dict, intervention_type: str, target_tra
     id_subspace = 0
     for s in target_subspaces:
         id_subspace = id_subspace - 1
-        subspaces = subspaces + "subspace(" + str(id_subspace) + "). "
+        subspaces = subspaces + f"subspace({id_subspace}). "
         for x in s.keys():
             value = str(s[x])
             if str(s[x]) == "0":
@@ -169,11 +169,9 @@ def create_asp_program_instance(primes: dict, intervention_type: str, target_tra
     id_subspace = -1
     for s in target_trap_spaces:
         id_subspace = id_subspace + 1
-        subspaces = subspaces + "subspace(" + str(id_subspace) + "). "
+        subspaces = subspaces + f"subspace({id_subspace}). "
         for x in s.keys():
-            value = str(s[x])
-            if str(s[x]) == "0":
-                value = "-1"
+            value = "-1" if str(s[x]) == "0" else str(s[x])
             goals = goals + "goal(" + str(id_subspace) + ", " + x + ", " + value + "). "
 
     max_nodes = max_size
@@ -277,4 +275,5 @@ def results_info(list_cs: List[dict]):
     cs_sizes.sort()
     for x in cs_sizes:
         text = text + ", " + str(x[1]) + " of size " + str(x[0])
+        text = f"{len(list_cs)} control strategies, " + ", ".join(f"{x[1]} of size {x[0]}" for x in cs_sizes)
     return text
